@@ -1,0 +1,164 @@
+{
+  "name": "AI Email Assistant",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f414480e-f3e0-4093-b51c-bcd671d391f2",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 1,
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "44a3f866-e029-4b91-bc71-d6234aea3bdd",
+      "name": "Get many messages",
+      "webhookId": "0213112e-74ec-48aa-9277-88151f34c426",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ntSOUnZCDJgcDxNv",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Read the following email and write a professional reply.\n\nEmail:\n{{ $json.snippet }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a professional email assistant. Write clear, polite, and concise email replies."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        416,
+        0
+      ],
+      "id": "6ab8931d-9cc7-401f-82e5-075cc048c450",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        416,
+        160
+      ],
+      "id": "17ef0ba8-37e0-4f8d-865b-d3564afedc18",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "TSz9UW5RCuU6cNjk",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "=Re: {{ $('Get many messages').item.json.snippet }}",
+        "message": "={{ $json.text }}",
+        "options": {
+          "sendTo": "ds2.santhosh46@gmail.com"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        768,
+        0
+      ],
+      "id": "ecabdb55-3f7d-48f7-980d-45289b2cdf18",
+      "name": "Create a draft",
+      "webhookId": "acd00009-3e74-4229-9122-925b8ade0a71",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ntSOUnZCDJgcDxNv",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get many messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many messages": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Create a draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ed939f0f-0808-4286-a0cc-b9a56d5cd39c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fc82bec1d2891955d811c3b3010ddd304bfc678d745458f3ddef66d63a52329a"
+  },
+  "nodeGroups": [],
+  "id": "FJ1uswq8wNHynPcs",
+  "tags": []
+}
